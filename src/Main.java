@@ -12,20 +12,26 @@ public class Main {
 	public static void main(String[] args) {
 		Trader trader=new Trader();//probably going to need some authentication passed here
 		iTradeAlgorithm algorithm;//probably going to be a lot of ways to go about this 
-		String[] tickerNames={"amd", "goog", "rcl", "aapl"};
+		String[] tickerNames={"stxs"};
 		String separatedVals=concatonateVals(tickerNames);
 		URL url;
 		BufferedReader reader = null;
+		int shares=760;
+		double tradeCost=9.99;
+		int maxLoss=-10;
+		double buyPrice=6.11;
 		while (true){
 			try {
 				url = new URL("http://download.finance.yahoo.com/d/quotes.csv?s="+separatedVals+"&f=l1&e=.csv");
 				reader = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"));
-				System.out.println(separatedVals.replace("+", "     "));
-				for (String line; (line = reader.readLine()) != null;) {
-					System.out.printf("%s    ",line);
+				double currentPrice=prettyPrint(separatedVals, reader);
+				
+				double priceDiff=currentPrice-buyPrice;
+				if (priceDiff*shares>tradeCost||priceDiff*shares<maxLoss){
+					System.out.println("SELL");
+					System.exit(0);
 				}
-				System.out.println();
-				Thread.sleep(4000);
+				Thread.sleep(1000);
 			} catch (IOException | InterruptedException e) {
 				System.err.println(e.getMessage());
 				System.err.println(e.getCause());
@@ -37,6 +43,18 @@ public class Main {
 			}
 		}
 
+	}
+
+	private static double prettyPrint(String separatedVals, BufferedReader reader)
+			throws IOException {
+		System.out.println(separatedVals.replace("+", "     "));
+		double currentPrice = -1;
+		for (String line; (line = reader.readLine()) != null;) {//currently set up for only one stock
+			currentPrice=Double.valueOf(line);
+			System.out.printf("%s    ",line);
+		}
+		System.out.println();
+		return currentPrice;
 	}
 
 	private static String concatonateVals(String[] tickerNames) {
