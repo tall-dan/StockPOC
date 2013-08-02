@@ -1,3 +1,5 @@
+CREATE SCHEMA `Stocks` ;
+use Stocks;
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
@@ -30,7 +32,7 @@ DROP TABLE IF EXISTS `stocks`;
 CREATE TABLE `stocks` (
   `Ticker_name` varchar(5) NOT NULL,
   `Buy_Price` decimal(5,4) NOT NULL,
-  `Shares` decimal(6,3) NOT NULL,
+  `Shares` int(11) NOT NULL,
   `Max_loss` decimal(5,4) NOT NULL,
   PRIMARY KEY (`Ticker_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;

@@ -1,7 +1,10 @@
+import java.util.ArrayList;
+
 
 public interface iTradeAlgorithm {
 
-	abstract Boolean buy();
-	Boolean sell();
+	abstract ArrayList<Stock> stocksToBuy();
+	ArrayList<Stock> stocksToSell();
+	void logTransaction(Stock stock, double currentPrice, String buyOrSell);
 	
 }

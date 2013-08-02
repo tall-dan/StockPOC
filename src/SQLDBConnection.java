@@ -107,9 +107,9 @@ public class SQLDBConnection {
 	public void createViews(ArrayList<String> tickerNames) {
 		String sql;
 		for (String viewName : tickerNames) {
-			sql = "create or replace view " + viewName + " as "
+			sql = "create or replace view " + viewName + "_prices as "
 					+ "select * from ticker_prices "
-					+ "where ticker_prices.Ticker_name='amd' "
+					+ "where ticker_prices.Ticker_name='"+viewName+"' "
 					+ "order by ticker_prices.Time desc;";
 			try {
 				executeUpdate(sql);
