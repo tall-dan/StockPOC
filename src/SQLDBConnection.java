@@ -22,30 +22,27 @@ public class SQLDBConnection {
 	private String db_url;
 	private String user;
 	private String password;
-	
-	public SQLDBConnection()
-			throws SQLException, ClassNotFoundException {
-		Properties prop=new Properties();
+
+	public SQLDBConnection() throws SQLException, ClassNotFoundException {
+		Properties prop = new Properties();
 		try {
 			prop.load(new FileInputStream("local.properties"));
-			String DBname=prop.getProperty("dbname");
+			String DBname = prop.getProperty("dbname");
 			this.user = prop.getProperty("user");
-			this.password=prop.getProperty("password");
+			this.password = prop.getProperty("password");
 			this.db_url = "jdbc:mysql://localhost:3306/" + DBname;
 			Class.forName(JDBC_DRIVER);
-			if (!user.equals("none")){
-				this.conn = DriverManager.getConnection(db_url, user,
-						password);
-			}
-			else{
+			if (!user.equals("none")) {
+				this.conn = DriverManager.getConnection(db_url, user, password);
+			} else {
 				this.conn = DriverManager.getConnection(db_url);
 			}
 			this.stmt = this.conn.createStatement();
-		} catch (ClassNotFoundException | SQLException |IOException e ) {
-			System.err.println("Exception in constructor: "+ e.getMessage());
+		} catch (ClassNotFoundException | SQLException | IOException e) {
+			System.err.println("Exception in constructor: " + e.getMessage());
 			e.printStackTrace();
 			System.exit(-1);
-		} 
+		}
 	}
 
 	// Insert, update, or delete
@@ -81,7 +78,7 @@ public class SQLDBConnection {
 		if (this.stmt == null || this.stmt.isClosed())
 			this.stmt = this.conn.createStatement();
 	}
-	
+
 	protected static ArrayList<String> getFollowedStocks() {
 		ArrayList<String> toRet = null;
 		try {
@@ -96,7 +93,7 @@ public class SQLDBConnection {
 		}
 		return toRet;
 	}
-	
+
 	protected static ArrayList<String> convertOneDimensionResultSetToArrayList(
 			ResultSet names) throws SQLException {
 		ArrayList<String> result = new ArrayList<String>();
@@ -105,6 +102,23 @@ public class SQLDBConnection {
 		}
 		names.close();
 		return result;
+	}
+
+	public void createViews(ArrayList<String> tickerNames) {
+		String sql;
+		for (String viewName : tickerNames) {
+			sql = "create or replace view " + viewName + " as "
+					+ "select * from ticker_prices "
+					+ "where ticker_prices.Ticker_name='amd' "
+					+ "order by ticker_prices.Time desc;";
+			try {
+				executeUpdate(sql);
+			} catch (ClassNotFoundException | SQLException e) {
+				System.err.println("error creating views");
+				System.err.println("SQL = "+sql);
+				e.printStackTrace();
+			}
+		}
 	}
 
 }
