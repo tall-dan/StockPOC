@@ -1,10 +1,13 @@
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Properties;
 
 /**
  * TODO Put here a description of what this class does.
@@ -16,32 +19,33 @@ public class SQLDBConnection {
 
 	private Connection conn;
 	private Statement stmt;
-
+	private String db_url;
 	private String user;
 	private String password;
-	private String db_url;
-
-	public SQLDBConnection(String user, String password, String DBname)
+	
+	public SQLDBConnection()
 			throws SQLException, ClassNotFoundException {
-		this.user = user;
-		this.password = password;
-		this.db_url = "jdbc:mysql://localhost:3306/" + DBname;
+		Properties prop=new Properties();
 		try {
+			prop.load(new FileInputStream("local.properties"));
+			String DBname=prop.getProperty("dbname");
+			this.user = prop.getProperty("user");
+			this.password=prop.getProperty("password");
+			this.db_url = "jdbc:mysql://localhost:3306/" + DBname;
 			Class.forName(JDBC_DRIVER);
 			if (!user.equals("none")){
-				this.conn = DriverManager.getConnection(this.db_url, user,
+				this.conn = DriverManager.getConnection(db_url, user,
 						password);
 			}
 			else{
-				this.conn = DriverManager.getConnection(this.db_url);
+				this.conn = DriverManager.getConnection(db_url);
 			}
 			this.stmt = this.conn.createStatement();
-			
-		} catch (ClassNotFoundException | SQLException e) {
+		} catch (ClassNotFoundException | SQLException |IOException e ) {
 			System.err.println("Exception in constructor: "+ e.getMessage());
-		
+			e.printStackTrace();
+			System.exit(-1);
 		} 
-
 	}
 
 	// Insert, update, or delete
@@ -50,7 +54,6 @@ public class SQLDBConnection {
 		if (!hasOpenStatementAndConnection())
 			reopenConnectionAndStatement();
 		return this.stmt.executeUpdate(sql);
-
 	}
 
 	// Select
@@ -77,6 +80,31 @@ public class SQLDBConnection {
 					this.password);
 		if (this.stmt == null || this.stmt.isClosed())
 			this.stmt = this.conn.createStatement();
+	}
+	
+	protected static ArrayList<String> getFollowedStocks() {
+		ArrayList<String> toRet = null;
+		try {
+			SQLDBConnection conn = new SQLDBConnection();
+			String sql = "Select Ticker_name from stocks";
+			ResultSet names = conn.executeQuery(sql);
+			toRet = convertOneDimensionResultSetToArrayList(names);
+		} catch (SQLException | ClassNotFoundException e) {
+			System.err.println("exception in getFollowedStocks");
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		return toRet;
+	}
+	
+	protected static ArrayList<String> convertOneDimensionResultSetToArrayList(
+			ResultSet names) throws SQLException {
+		ArrayList<String> result = new ArrayList<String>();
+		while (names.next()) {
+			result.add(names.getString(1));
+		}
+		names.close();
+		return result;
 	}
 
 }
