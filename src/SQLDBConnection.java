@@ -23,7 +23,7 @@ public class SQLDBConnection {
 	private String user;
 	private String password;
 
-	public SQLDBConnection() throws SQLException, ClassNotFoundException {
+	public SQLDBConnection()  {
 		Properties prop = new Properties();
 		try {
 			prop.load(new FileInputStream("local.properties"));
@@ -46,11 +46,18 @@ public class SQLDBConnection {
 	}
 
 	// Insert, update, or delete
-	public int executeUpdate(String sql) throws ClassNotFoundException,
-			SQLException {
-		if (!hasOpenStatementAndConnection())
-			reopenConnectionAndStatement();
-		return this.stmt.executeUpdate(sql);
+	public int executeUpdate(String sql) {
+		int toRet=-1;
+		try {
+			if (!hasOpenStatementAndConnection())
+				reopenConnectionAndStatement();
+			return this.stmt.executeUpdate(sql);
+		} catch (SQLException exception) {
+			System.err.println("SQLException: sql = "+sql);
+			exception.printStackTrace();
+			System.exit(-1);
+		}
+		return toRet;
 	}
 
 	// Select
@@ -59,48 +66,56 @@ public class SQLDBConnection {
 			if (!hasOpenStatementAndConnection())
 				reopenConnectionAndStatement();
 			return this.stmt.executeQuery(sql);
-		} catch (Exception exception) {
+		} catch (SQLException exception) {
+			System.err.println("SQLException: sql = "+sql);
 			exception.printStackTrace();
+			System.exit(-1);
+		}
+		finally{
+			System.err.println("An uncaught error passed through executeQuery");
 			return null;
 		}
-
 	}
 
 	private boolean hasOpenStatementAndConnection() throws SQLException {
 		return !this.conn.isClosed() && !this.stmt.isClosed();
 	}
 
-	private void reopenConnectionAndStatement() throws SQLException,
-			ClassNotFoundException {
-		if (this.conn == null || this.conn.isClosed())
-			this.conn = DriverManager.getConnection(this.db_url, this.user,
-					this.password);
-		if (this.stmt == null || this.stmt.isClosed())
-			this.stmt = this.conn.createStatement();
+	private void reopenConnectionAndStatement() {
+		try {
+			if (this.conn == null || this.conn.isClosed())
+				this.conn = DriverManager.getConnection(this.db_url, this.user,
+						this.password);
+			if (this.stmt == null || this.stmt.isClosed())
+				this.stmt = this.conn.createStatement();
+		} catch (SQLException exception) {
+			exception.printStackTrace();
+			System.exit(-1);
+		}
 	}
 
-	protected static ArrayList<String> getFollowedStocks() {
+	protected static ArrayList<String> getOwnedStocks() {
 		ArrayList<String> toRet = null;
-		try {
 			SQLDBConnection conn = new SQLDBConnection();
 			String sql = "Select Ticker_name from stocks";
 			ResultSet names = conn.executeQuery(sql);
 			toRet = convertOneDimensionResultSetToArrayList(names);
-		} catch (SQLException | ClassNotFoundException e) {
-			System.err.println("exception in getFollowedStocks");
-			e.printStackTrace();
-			System.exit(-1);
-		}
 		return toRet;
 	}
 
 	protected static ArrayList<String> convertOneDimensionResultSetToArrayList(
-			ResultSet names) throws SQLException {
+			ResultSet names) {
 		ArrayList<String> result = new ArrayList<String>();
-		while (names.next()) {
-			result.add(names.getString(1));
+		try {
+			while (names.next()) {
+				result.add(names.getString(1));
+			}
+			names.close();
+		} catch (SQLException e) {
+			System.err.println("exception in convertOneDimensionResultSetToArrayList");
+			e.printStackTrace();
+			System.exit(-1);
 		}
-		names.close();
 		return result;
 	}
 
@@ -111,13 +126,8 @@ public class SQLDBConnection {
 					+ "select * from ticker_prices "
 					+ "where ticker_prices.Ticker_name='"+viewName+"' "
 					+ "order by ticker_prices.Time desc;";
-			try {
-				executeUpdate(sql);
-			} catch (ClassNotFoundException | SQLException e) {
-				System.err.println("error creating views");
-				System.err.println("SQL = "+sql);
-				e.printStackTrace();
-			}
+			executeUpdate(sql);
+			
 		}
 	}
 

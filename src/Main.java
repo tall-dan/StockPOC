@@ -17,15 +17,9 @@ public class Main {
 	public static void main(String[] args) {
 		eTrader trader = new eTrader();// something like etrade that'll do our
 										// trading for us
-		SQLDBConnection conn = null;
-		try {
-			conn = new SQLDBConnection();
-		} catch (ClassNotFoundException | SQLException e1) {
-			
-			e1.printStackTrace();
-		}
+		SQLDBConnection conn = new SQLDBConnection();
 		iTradeAlgorithm algorithm = new Algorithm1();// our algorithm for buying/selling
-		ArrayList<String> tickerNames = conn.getFollowedStocks();
+		ArrayList<String> tickerNames = SQLDBConnection.getOwnedStocks();
 		conn.createViews(tickerNames);
 		String separatedVals = concatonateVals(tickerNames);
 		URL url;
@@ -60,9 +54,7 @@ public class Main {
 		}
 	}
 
-	/*
-	 * Keeps us from inserting the same data into the table repeatedly
-	 */
+
 	private static ArrayList<Stock> getPricesFromURI(
 			ArrayList<String> tickerNames, BufferedReader reader)
 			throws IOException {
@@ -71,7 +63,7 @@ public class Main {
 		double currentPrice = -1;
 		for (String line; (line = reader.readLine()) != null;) {
 			currentPrice = Double.valueOf(line);
-			Stock stock = new Stock(tickerNames.get(i), currentPrice, -1, -1);
+			Stock stock = new Stock(tickerNames.get(i), currentPrice, -1, -1, null);
 			i++;
 			toRet.add(stock);
 		}

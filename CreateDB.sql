@@ -29,11 +29,12 @@ CREATE TABLE `Transaction_history` (
 DROP TABLE IF EXISTS `stocks`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `stocks` (
+CREATE TABLE `Owned_Stocks` (
   `Ticker_name` varchar(5) NOT NULL,
-  `Buy_Price` decimal(5,4) NOT NULL,
+  `Buy_price` decimal(5,4) NOT NULL,
   `Shares` int(11) NOT NULL,
   `Max_loss` decimal(5,4) NOT NULL,
+  `Buy_date` datetime DEFAULT NULL,
   PRIMARY KEY (`Ticker_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -47,6 +48,25 @@ CREATE TABLE `ticker_prices` (
   `EntryID` int(11) NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`EntryID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+DROP TABLE IF EXISTS `Followed_Stocks`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `Followed_Stocks` (
+  `Ticker_name` varchar(5) NOT NULL,
+  PRIMARY KEY (`Ticker_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+DROP TABLE IF EXISTS `Day_Trades`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `Day_Trades` (
+  `Ticker_name` varchar(5) NOT NULL,
+  `Buy_time` datetime NOT NULL,
+  `Sell_time` datetime NOT NULL,
+  `EntryID` int(11) NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`EntryID`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
