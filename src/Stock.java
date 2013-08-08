@@ -10,6 +10,7 @@ public class Stock {// Data class.
 
 	private String name;
 	private double buyPrice;
+	private double sellPrice;
 	private int shares;
 	private double maxLoss;
 	private Date buyTime;
@@ -22,6 +23,12 @@ public class Stock {// Data class.
 		this.shares = shares;
 		this.maxLoss = maxLoss;
 		this.buyTime = buyTime;
+	}
+	/**
+	 * sell price - buy price
+	 */
+	public double getProfit(){
+		return this.sellPrice-this.buyPrice;
 	}
 
 	protected static void pushPricesToDB(ArrayList<Stock> currentPrices)
@@ -44,8 +51,24 @@ public class Stock {// Data class.
 		}
 
 	}
+	
+	protected double getCurrentPrice() {
+		String sql = "Select Price from " + getName()
+				+ "_prices order by Time desc limit 1";
+		ResultSet price = new SQLDBConnection().executeQuery(sql);
+		double currentPrice = -1;
+		try {
+			price.next();
+			currentPrice = Double.valueOf(price.getString(1));
+		} catch (SQLException e) {
+			System.err.println("no price entry for" + getName());
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		return currentPrice;
+	}
 
-	protected static ArrayList<String> getStocksFromUser() {
+	protected static ArrayList<Stock> getStocksFromUser() {
 		// in the future, this will bring up a prompt that gets stocks and
 		// prices from the user. but for now...
 		System.err
@@ -123,6 +146,14 @@ public class Stock {// Data class.
 	}
 	public void setBuyTime(Date time){
 		this.buyTime=time;
+	}
+
+	public double getSellPrice() {
+		return sellPrice;
+	}
+
+	public void setSellPrice(double sellPrice) {
+		this.sellPrice = sellPrice;
 	}
 
 }

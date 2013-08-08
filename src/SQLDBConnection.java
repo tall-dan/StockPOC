@@ -6,7 +6,11 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Properties;
 
 /**
@@ -62,19 +66,17 @@ public class SQLDBConnection {
 
 	// Select
 	public ResultSet executeQuery(String sql) {
+		ResultSet result=null;
 		try {
 			if (!hasOpenStatementAndConnection())
 				reopenConnectionAndStatement();
-			return this.stmt.executeQuery(sql);
+			result= this.stmt.executeQuery(sql);
 		} catch (SQLException exception) {
 			System.err.println("SQLException: sql = "+sql);
 			exception.printStackTrace();
 			System.exit(-1);
 		}
-		finally{
-			System.err.println("An uncaught error passed through executeQuery");
-			return null;
-		}
+		return result;
 	}
 
 	private boolean hasOpenStatementAndConnection() throws SQLException {
@@ -94,13 +96,33 @@ public class SQLDBConnection {
 		}
 	}
 
-	protected static ArrayList<String> getOwnedStocks() {
-		ArrayList<String> toRet = null;
-			SQLDBConnection conn = new SQLDBConnection();
-			String sql = "Select Ticker_name from stocks";
-			ResultSet names = conn.executeQuery(sql);
-			toRet = convertOneDimensionResultSetToArrayList(names);
-		return toRet;
+	protected ArrayList<Stock> getOwnedStocks() {
+		ArrayList<Stock> stocks = new ArrayList<Stock>();
+		ResultSet rows = executeQuery("Select * from Owned_Stocks");
+		try {
+			while (rows.next()) {
+				String name = rows.getString("Ticker_name");
+				double buyPrice = Double.valueOf(rows.getString("Buy_Price"));
+				int shares = Integer.valueOf(rows.getString("Shares"));
+				double maxLoss = Double.valueOf(rows.getString("Max_loss"));
+				DateFormat dateFormat = new SimpleDateFormat(
+						"yyyy/MM/dd HH:mm:ss");
+				Date buyDate = null;
+				buyDate = dateFormat.parse(rows.getString("Buy_date"));
+				stocks.add(new Stock(name, buyPrice, shares, maxLoss,
+						buyDate));
+			}
+			rows.close();
+		} catch (ParseException exception) {
+			System.err.println("Error parsing date from DB");
+			exception.printStackTrace();
+			System.exit(-1);
+		} catch (SQLException e) {
+			System.err.println("SQL exception caused by getString()");
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		return stocks;
 	}
 
 	protected static ArrayList<String> convertOneDimensionResultSetToArrayList(
@@ -119,12 +141,12 @@ public class SQLDBConnection {
 		return result;
 	}
 
-	public void createViews(ArrayList<String> tickerNames) {
+	public void createViews(ArrayList<Stock> tickerNames) {
 		String sql;
-		for (String viewName : tickerNames) {
-			sql = "create or replace view " + viewName + "_prices as "
+		for (Stock viewName : tickerNames) {
+			sql = "create or replace view " + viewName.getName() + "_prices as "
 					+ "select * from ticker_prices "
-					+ "where ticker_prices.Ticker_name='"+viewName+"' "
+					+ "where ticker_prices.Ticker_name='"+viewName.getName()+"' "
 					+ "order by ticker_prices.Time desc;";
 			executeUpdate(sql);
 			

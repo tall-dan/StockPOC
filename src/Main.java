@@ -19,7 +19,7 @@ public class Main {
 										// trading for us
 		SQLDBConnection conn = new SQLDBConnection();
 		iTradeAlgorithm algorithm = new Algorithm1();// our algorithm for buying/selling
-		ArrayList<String> tickerNames = SQLDBConnection.getOwnedStocks();
+		ArrayList<Stock> tickerNames = conn.getOwnedStocks();
 		conn.createViews(tickerNames);
 		String separatedVals = concatonateVals(tickerNames);
 		URL url;
@@ -56,27 +56,27 @@ public class Main {
 
 
 	private static ArrayList<Stock> getPricesFromURI(
-			ArrayList<String> tickerNames, BufferedReader reader)
+			ArrayList<Stock> tickerNames, BufferedReader reader)
 			throws IOException {
 		int i = 0;
 		ArrayList<Stock> toRet = new ArrayList<Stock>();
 		double currentPrice = -1;
 		for (String line; (line = reader.readLine()) != null;) {
 			currentPrice = Double.valueOf(line);
-			Stock stock = new Stock(tickerNames.get(i), currentPrice, -1, -1, null);
+			Stock stock = new Stock(tickerNames.get(i).getName(), currentPrice, -1, -1, null);
 			i++;
 			toRet.add(stock);
 		}
 		return toRet;
 	}
 
-	private static String concatonateVals(ArrayList<String> tickerNames) {
+	private static String concatonateVals(ArrayList<Stock> tickerNames) {
 		if (tickerNames.size()==0){
 			tickerNames=Stock.getStocksFromUser();
 		}
-		String returnVal = tickerNames.get(0);
+		String returnVal = tickerNames.get(0).getName();
 		for (int i = 1; i < tickerNames.size(); i++) {
-			returnVal += "+" + tickerNames.get(i);
+			returnVal += "+" + tickerNames.get(i).getName();
 		}
 		System.out.println(returnVal);
 		return returnVal;
