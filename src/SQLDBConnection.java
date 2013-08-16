@@ -10,6 +10,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
 
@@ -47,6 +48,20 @@ public class SQLDBConnection {
 			e.printStackTrace();
 			System.exit(-1);
 		}
+	}
+	
+	protected double getCurrentCash(){
+		ResultSet moneySet=executeQuery("select * from Current_Cash");
+		try {
+			moneySet.next();
+			return moneySet.getDouble(1);
+		} catch (SQLException e) {
+			System.err.println("Failed to get cash from DB");
+			System.err.println(e.getStackTrace());
+			System.err.println(e.getMessage());
+			System.exit(-1);
+		}
+		return -1;
 	}
 
 	// Insert, update, or delete
@@ -101,14 +116,16 @@ public class SQLDBConnection {
 		ResultSet rows = executeQuery("Select * from Owned_Stocks");
 		try {
 			while (rows.next()) {
-				String name = rows.getString("Ticker_name");
-				double buyPrice = Double.valueOf(rows.getString("Buy_Price"));
-				int shares = Integer.valueOf(rows.getString("Shares"));
-				double maxLoss = Double.valueOf(rows.getString("Max_loss"));
+				String name = rows.getString("tickerName");
+				double buyPrice = Double.valueOf(rows.getString("buyPrice"));
+				int shares = Integer.valueOf(rows.getString("shares"));
+				double maxLoss = Double.valueOf(rows.getString("maxLoss"));
 				DateFormat dateFormat = new SimpleDateFormat(
-						"yyyy/MM/dd HH:mm:ss");
+						"yyyy-MM-dd HH:mm:ss");
 				Date buyDate = null;
-				buyDate = dateFormat.parse(rows.getString("Buy_date"));
+				String stringBuyDate=rows.getString("buyDate").substring(0, 19);
+				buyDate = dateFormat.parse(stringBuyDate);
+				Calendar c = Calendar.getInstance();
 				stocks.add(new Stock(name, buyPrice, shares, maxLoss,
 						buyDate));
 			}
@@ -124,6 +141,26 @@ public class SQLDBConnection {
 		}
 		return stocks;
 	}
+	
+	protected ArrayList<Stock> getFollowedStocks() {
+		ArrayList<Stock> stocks = new ArrayList<Stock>();
+		ResultSet rows = executeQuery("Select * from Followed_Stocks");
+		try {
+			while (rows.next()) {
+				String name = rows.getString("tickerName");
+				Stock stock=new Stock(name,0,0,0,null);
+				stocks.add(stock);
+			}
+			rows.close();
+		} catch (SQLException e) {
+			System.err.println("SQL exception caused by getString()");
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		return stocks;
+	}
+	
+	
 
 	protected static ArrayList<String> convertOneDimensionResultSetToArrayList(
 			ResultSet names) {
@@ -144,10 +181,10 @@ public class SQLDBConnection {
 	public void createViews(ArrayList<Stock> tickerNames) {
 		String sql;
 		for (Stock viewName : tickerNames) {
-			sql = "create or replace view " + viewName.getName() + "_prices as "
-					+ "select * from ticker_prices "
-					+ "where ticker_prices.Ticker_name='"+viewName.getName()+"' "
-					+ "order by ticker_prices.Time desc;";
+			sql = "create or replace view " + viewName.getName() + "_Prices as "
+					+ "select * from Ticker_Prices "
+					+ "where Ticker_Prices.tickerName='"+viewName.getName()+"' "
+					+ "order by Ticker_Prices.time desc;";
 			executeUpdate(sql);
 			
 		}

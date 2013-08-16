@@ -24,6 +24,7 @@ public class Stock {// Data class.
 		this.maxLoss = maxLoss;
 		this.buyTime = buyTime;
 	}
+	
 	/**
 	 * sell price - buy price
 	 */
@@ -40,7 +41,7 @@ public class Stock {// Data class.
 				DateFormat dateFormat = new SimpleDateFormat(
 						"yyyy/MM/dd HH:mm:ss");
 				Date date = new Date();
-				sql = "Insert into ticker_prices (Ticker_name, Price, Time) values ('"
+				sql = "Insert into Ticker_Prices (tickerName, price, time) values ('"
 						+ stock.getName()
 						+ " ',"
 						+ stock.getBuyPrice()
@@ -54,7 +55,7 @@ public class Stock {// Data class.
 	
 	protected double getCurrentPrice() {
 		String sql = "Select Price from " + getName()
-				+ "_prices order by Time desc limit 1";
+				+ "_Prices order by time desc limit 1";
 		ResultSet price = new SQLDBConnection().executeQuery(sql);
 		double currentPrice = -1;
 		try {
@@ -83,7 +84,7 @@ public class Stock {// Data class.
 	private static boolean isCurrentPrice(Stock stock, SQLDBConnection conn)
 			throws NumberFormatException, SQLException {
 		String sql = "SELECT Price FROM " + stock.getName()
-				+ "_prices ORDER BY Time DESC Limit 1;";
+				+ "_Prices ORDER BY time DESC Limit 1;";
 		ResultSet currentPrice = conn.executeQuery(sql);
 		if (currentPrice.next()
 				&& Double.valueOf(currentPrice.getString(1)) == stock

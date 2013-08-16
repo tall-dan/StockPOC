@@ -19,7 +19,7 @@ public class Main {
 										// trading for us
 		SQLDBConnection conn = new SQLDBConnection();
 		iTradeAlgorithm algorithm = new Algorithm1();// our algorithm for buying/selling
-		ArrayList<Stock> tickerNames = conn.getOwnedStocks();
+		ArrayList<Stock> tickerNames = conn.getFollowedStocks();//Make sure you're following your owned stocks
 		conn.createViews(tickerNames);
 		String separatedVals = concatonateVals(tickerNames);
 		URL url;
@@ -37,6 +37,7 @@ public class Main {
 				Stock.pushPricesToDB(currentPrices);
 				trader.buy(algorithm.stocksToBuy());
 				trader.sell(algorithm.stocksToSell());
+				algorithm.updateOwnedStocks();
 				Thread.sleep(1000);
 			} catch (IOException | InterruptedException
 					| ClassNotFoundException | SQLException e) {

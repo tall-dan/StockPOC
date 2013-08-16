@@ -10,20 +10,40 @@ import java.util.Date;
 public class Algorithm1 implements iTradeAlgorithm {
 	SQLDBConnection conn;
 	private double tradeFee = 9.99;
+	private int minimumInvestment=2500;//Play around with this
+	private double maxWaste=30;
 	ArrayList<Stock> stocks;
 	private double minimumProfitPerSale;
 	public Algorithm1() {
 		this.conn = new SQLDBConnection();
+		updateOwnedStocks();
+	}
+	
+	@Override
+	public void updateOwnedStocks(){
 		this.stocks=this.conn.getOwnedStocks();
 	}
-
-
 	@Override
 	public ArrayList<Stock> stocksToBuy() {
+		ArrayList<Stock> stocksToBuy=new ArrayList<Stock>();
+		double currentCash=this.conn.getCurrentCash();
+		if (currentCash>minimumInvestment){
+			ArrayList<Stock> followed=this.conn.getFollowedStocks();
+			for (Stock stock: followed){
+				double currentPrice=stock.getCurrentPrice();
+				int shares=(int) Math.floor((currentCash-tradeFee)/currentPrice);
+				if (currentCash-shares*currentPrice<maxWaste){
+					stock.setShares(shares);
+					stock.setBuyPrice(currentPrice);
+					stock.setBuyTime(new Date());
+					stocksToBuy.add(stock);
+				}
+			}
+		}
 		/*
 		 * logTransaction(); addStockToTable(stock);
 		 */
-		return null;
+		return stocksToBuy;
 	}
 
 	@Override
@@ -33,11 +53,11 @@ public class Algorithm1 implements iTradeAlgorithm {
 			double currentPrice = stock.getCurrentPrice();
 			if ((currentPrice - stock.getBuyPrice()) * stock.getShares() > tradeFee+minimumProfitPerSale) {
 				stocksToSell.add(stock);
-				
-				
+			}
+			else if ((currentPrice-stock.getBuyPrice())*stock.getShares()*-1 > stock.getMaxLoss()){
+				stocksToSell.add(stock);
 			}
 		}
-
 		return stocksToSell;
 	}
 
