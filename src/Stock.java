@@ -102,6 +102,8 @@ public class Stock {// Data class.
 		Calendar now = Calendar.getInstance();// set to current time
 		Calendar buyDay = Calendar.getInstance();
 		buyDay.setTime(this.buyTime);
+		if (buyDay.equals(now))
+			return false;
 		if (buyDay.get(Calendar.MONTH) == now.get(Calendar.MONTH)
 				&& buyDay.get(Calendar.DAY_OF_MONTH) == now
 						.get(Calendar.DAY_OF_MONTH)

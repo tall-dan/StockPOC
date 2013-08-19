@@ -2,12 +2,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 
 public class Main {
 
@@ -18,15 +14,29 @@ public class Main {
 		eTrader trader = new eTrader();// something like etrade that'll do our
 										// trading for us
 		SQLDBConnection conn = new SQLDBConnection();
-		iTradeAlgorithm algorithm = new Algorithm1();// our algorithm for buying/selling
-		ArrayList<Stock> tickerNames = conn.getFollowedStocks();//Make sure you're following your owned stocks
+		iTradeAlgorithm algorithm = new Algorithm1();// our algorithm for
+														// buying/selling
+		ArrayList<Stock> tickerNames = conn.getFollowedStocks();
+		/*
+		 * Make sure you're following your owned stocks
+		 */
 		conn.createViews(tickerNames);
 		String separatedVals = concatonateVals(tickerNames);
 		URL url;
 		BufferedReader reader = null;
 
+		
+		/*
+		 * Runtime r = Runtime.getRuntime(); long memBefore=0; long memAfter=0;
+		 */
 		while (true) {
 			try {
+				
+				/*memAfter = r.totalMemory();
+				 * if (memBefore!=memAfter){
+				 * System.out.println("memory used by the JVM is "+memAfter);
+				 * memBefore=memAfter; }
+				 */
 				url = new URL(
 						"http://download.finance.yahoo.com/d/quotes.csv?s="
 								+ separatedVals + "&f=l1&e=.csv");
@@ -55,7 +65,6 @@ public class Main {
 		}
 	}
 
-
 	private static ArrayList<Stock> getPricesFromURI(
 			ArrayList<Stock> tickerNames, BufferedReader reader)
 			throws IOException {
@@ -64,7 +73,8 @@ public class Main {
 		double currentPrice = -1;
 		for (String line; (line = reader.readLine()) != null;) {
 			currentPrice = Double.valueOf(line);
-			Stock stock = new Stock(tickerNames.get(i).getName(), currentPrice, -1, -1, null);
+			Stock stock = new Stock(tickerNames.get(i).getName(), currentPrice,
+					-1, -1, null);
 			i++;
 			toRet.add(stock);
 		}
@@ -72,8 +82,8 @@ public class Main {
 	}
 
 	private static String concatonateVals(ArrayList<Stock> tickerNames) {
-		if (tickerNames.size()==0){
-			tickerNames=Stock.getStocksFromUser();
+		if (tickerNames.size() == 0) {
+			tickerNames = Stock.getStocksFromUser();
 		}
 		String returnVal = tickerNames.get(0).getName();
 		for (int i = 1; i < tickerNames.size(); i++) {
@@ -83,5 +93,4 @@ public class Main {
 		return returnVal;
 	}
 
-	
 }

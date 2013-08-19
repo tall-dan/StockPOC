@@ -29,12 +29,20 @@ public class eTrader {
 			if (allowTrade(stock)) {
 				stock.setSellPrice(stock.getCurrentPrice());
 				logTransaction(stock, "sell");
+				updateMostRecentSellPrice(stock);
 				removeStockFromTable(stock);
 				updateCash(stock,"sell");
 				System.out.println("sold some stocks, yo");
 			}
 		}
 	}
+
+	private void updateMostRecentSellPrice(Stock stock) {
+		String sql = "Update Followed_Stocks Set mostRecentSellPrice = "+ stock.getCurrentPrice()+"where tickerName = '"+stock.getName()+"';";
+		this.conn.executeUpdate(sql);
+	}
+
+
 
 	private void updateCash(Stock stock, String buy_sell) {
 		if (buy_sell.equals("sell")){

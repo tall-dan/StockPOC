@@ -11,7 +11,7 @@ public class Algorithm1 implements iTradeAlgorithm {
 	SQLDBConnection conn;
 	private double tradeFee = 9.99;
 	private int minimumInvestment=2500;//Play around with this
-	private double maxWaste=30;
+	private double maxWaste=100;
 	ArrayList<Stock> stocks;
 	private double minimumProfitPerSale;
 	public Algorithm1() {
@@ -32,7 +32,7 @@ public class Algorithm1 implements iTradeAlgorithm {
 			for (Stock stock: followed){
 				double currentPrice=stock.getCurrentPrice();
 				int shares=(int) Math.floor((currentCash-tradeFee)/currentPrice);
-				if (currentCash-shares*currentPrice<maxWaste){
+				if (currentCash-shares*currentPrice<maxWaste&&currentPrice<stock.getBuyPrice()){//stock.getBuyPrice is actually it's most recent sale price.
 					stock.setShares(shares);
 					stock.setBuyPrice(currentPrice);
 					stock.setBuyTime(new Date());

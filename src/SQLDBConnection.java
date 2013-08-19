@@ -142,13 +142,20 @@ public class SQLDBConnection {
 		return stocks;
 	}
 	
+	/**
+	 * This returns an array of stock names. Each stock has mostRecentlySoldPrice as its buy price
+	 * @return ArrayList<Stock>
+	 */
+	
 	protected ArrayList<Stock> getFollowedStocks() {
 		ArrayList<Stock> stocks = new ArrayList<Stock>();
 		ResultSet rows = executeQuery("Select * from Followed_Stocks");
 		try {
 			while (rows.next()) {
 				String name = rows.getString("tickerName");
-				Stock stock=new Stock(name,0,0,0,null);
+				Double mostRecentSellPrice= rows.getDouble("mostRecentSellPrice");
+				mostRecentSellPrice = (mostRecentSellPrice==0? 1000000: mostRecentSellPrice);
+				Stock stock=new Stock(name,mostRecentSellPrice,0,0,null);
 				stocks.add(stock);
 			}
 			rows.close();
