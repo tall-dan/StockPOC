@@ -1,7 +1,9 @@
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
@@ -25,23 +27,23 @@ public class Main {
 		URL url;
 		BufferedReader reader = null;
 
-		
 		/*
 		 * Runtime r = Runtime.getRuntime(); long memBefore=0; long memAfter=0;
 		 */
-		while (true) {
-			try {
-				
-				/*memAfter = r.totalMemory();
-				 * if (memBefore!=memAfter){
+		InputStream in = null;
+		try {
+			url = new URL("http://download.finance.yahoo.com/d/quotes.csv?s="
+					+ separatedVals + "&f=l1&e=.csv");
+			while (true) {
+				in = url.openStream();
+
+				/*
+				 * memAfter = r.totalMemory(); if (memBefore!=memAfter){
 				 * System.out.println("memory used by the JVM is "+memAfter);
 				 * memBefore=memAfter; }
 				 */
-				url = new URL(
-						"http://download.finance.yahoo.com/d/quotes.csv?s="
-								+ separatedVals + "&f=l1&e=.csv");
-				reader = new BufferedReader(new InputStreamReader(
-						url.openStream(), "UTF-8"));
+
+				reader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
 				ArrayList<Stock> currentPrices = getPricesFromURI(tickerNames,
 						reader);
 				Stock.pushPricesToDB(currentPrices);
@@ -49,19 +51,35 @@ public class Main {
 				trader.sell(algorithm.stocksToSell());
 				algorithm.updateOwnedStocks();
 				Thread.sleep(1000);
-			} catch (IOException | InterruptedException
-					| ClassNotFoundException | SQLException e) {
+			}
+		} catch (InterruptedException | ClassNotFoundException | SQLException e) {
+			System.err.println(e.getMessage());
+			System.err.println(e.getCause());
+			e.printStackTrace();
+			System.exit(-1);
+		} catch (IOException e) {
+			if (e.getClass().equals(UnknownHostException.class)) {
+				System.err.println("Yahoo is experiencing difficulties");
+				try {
+					in.close();
+				} catch (IOException e1) {
+					System.err
+							.println("Could not close input stream.  Exiting");
+					System.exit(-1);
+				}
+			} else {
 				System.err.println(e.getMessage());
 				System.err.println(e.getCause());
 				e.printStackTrace();
 				System.exit(-1);
-			} finally {
-				if (reader != null)
-					try {
-						reader.close();
-					} catch (IOException ignore) {
-					}
 			}
+
+		} finally {
+			if (reader != null)
+				try {
+					reader.close();
+				} catch (IOException ignore) {
+				}
 		}
 	}
 
@@ -70,14 +88,17 @@ public class Main {
 			throws IOException {
 		int i = 0;
 		ArrayList<Stock> toRet = new ArrayList<Stock>();
-		double currentPrice = -1;
+		double currentPrice;
+		//String printString="";
 		for (String line; (line = reader.readLine()) != null;) {
 			currentPrice = Double.valueOf(line);
 			Stock stock = new Stock(tickerNames.get(i).getName(), currentPrice,
 					-1, -1, null);
 			i++;
 			toRet.add(stock);
+			//printString+=stock.getName()+" "+currentPrice+"\t";
 		}
+		//System.out.println(printString);
 		return toRet;
 	}
 

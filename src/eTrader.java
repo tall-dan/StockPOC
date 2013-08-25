@@ -12,13 +12,13 @@ public class eTrader {
 	private double tradeFee=9.99;
 	public void buy(ArrayList<Stock> stocksToBuy) {
 		for (Stock stock: stocksToBuy){
-			if (allowTrade(stock)){
+//			if (allowTrade(stock)){
 				logTransaction(stock, "buy");
 				addStockToTable(stock);
 				updateCash(stock,"buy");
 				System.out.println("Bought a stock, yo");
 				return; //only buy one stock at a time.
-			}
+	//		}
 		}
 	}
 
@@ -143,7 +143,7 @@ public class eTrader {
 				+ "', "
 				+ currentPrice*shares*saleFlag
 				+ ", "
-				+ ((currentPrice - stock.getBuyPrice()) * shares) 
+				+ (((currentPrice - stock.getBuyPrice()) * shares)-tradeFee) 
 				+ ", '" 
 				+ dateFormat.format(date) + "');";
 		this.conn.executeUpdate(sql);

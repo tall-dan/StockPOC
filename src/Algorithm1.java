@@ -51,7 +51,7 @@ public class Algorithm1 implements iTradeAlgorithm {
 		ArrayList<Stock> stocksToSell = new ArrayList<Stock>();
 		for (Stock stock : this.stocks) {
 			double currentPrice = stock.getCurrentPrice();
-			if ((currentPrice - stock.getBuyPrice()) * stock.getShares() > tradeFee+minimumProfitPerSale) {
+			if ((currentPrice - stock.getBuyPrice()) * stock.getShares() > 2*tradeFee+minimumProfitPerSale) {
 				stocksToSell.add(stock);
 			}
 			else if ((currentPrice-stock.getBuyPrice())*stock.getShares()*-1 > stock.getMaxLoss()){
