@@ -1,3 +1,5 @@
+package model;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -28,7 +30,7 @@ public class SQLDBConnection {
 	private String user;
 	private String password;
 
-	public SQLDBConnection()  {
+	public SQLDBConnection() {
 		Properties prop = new Properties();
 		try {
 			prop.load(new FileInputStream("local.properties"));
@@ -49,9 +51,9 @@ public class SQLDBConnection {
 			System.exit(-1);
 		}
 	}
-	
-	protected double getCurrentCash(){
-		ResultSet moneySet=executeQuery("select * from Current_Cash");
+
+	protected double getCurrentCash() {
+		ResultSet moneySet = executeQuery("select * from Current_Cash");
 		try {
 			moneySet.next();
 			return moneySet.getDouble(1);
@@ -66,13 +68,13 @@ public class SQLDBConnection {
 
 	// Insert, update, or delete
 	public int executeUpdate(String sql) {
-		int toRet=-1;
+		int toRet = -1;
 		try {
 			if (!hasOpenStatementAndConnection())
 				reopenConnectionAndStatement();
 			return this.stmt.executeUpdate(sql);
 		} catch (SQLException exception) {
-			System.err.println("SQLException: sql = "+sql);
+			System.err.println("SQLException: sql = " + sql);
 			exception.printStackTrace();
 			System.exit(-1);
 		}
@@ -81,13 +83,13 @@ public class SQLDBConnection {
 
 	// Select
 	public ResultSet executeQuery(String sql) {
-		ResultSet result=null;
+		ResultSet result = null;
 		try {
 			if (!hasOpenStatementAndConnection())
 				reopenConnectionAndStatement();
-			result= this.stmt.executeQuery(sql);
+			result = this.stmt.executeQuery(sql);
 		} catch (SQLException exception) {
-			System.err.println("SQLException: sql = "+sql);
+			System.err.println("SQLException: sql = " + sql);
 			exception.printStackTrace();
 			System.exit(-1);
 		}
@@ -119,15 +121,13 @@ public class SQLDBConnection {
 				String name = rows.getString("tickerName");
 				double buyPrice = Double.valueOf(rows.getString("buyPrice"));
 				int shares = Integer.valueOf(rows.getString("shares"));
-				double maxLoss = Double.valueOf(rows.getString("maxLoss"));
 				DateFormat dateFormat = new SimpleDateFormat(
 						"yyyy-MM-dd HH:mm:ss");
 				Date buyDate = null;
-				String stringBuyDate=rows.getString("buyDate").substring(0, 19);
+				String stringBuyDate = rows.getString("buyDate").substring(0,
+						19);
 				buyDate = dateFormat.parse(stringBuyDate);
-				Calendar c = Calendar.getInstance();
-				stocks.add(new Stock(name, buyPrice, shares, maxLoss,
-						buyDate));
+				stocks.add(new Stock(name, buyPrice, shares, buyDate));
 			}
 			rows.close();
 		} catch (ParseException exception) {
@@ -141,22 +141,30 @@ public class SQLDBConnection {
 		}
 		return stocks;
 	}
-	
+
 	/**
-	 * This returns an array of stock names. Each stock has mostRecentlySoldPrice as its buy price
+	 * This returns an array of stock names. Each stock has
+	 * mostRecentlySoldPrice as its buy price
+	 * 
 	 * @return ArrayList<Stock>
 	 */
-	
-	protected ArrayList<Stock> getFollowedStocks() {
-		ArrayList<Stock> stocks = new ArrayList<Stock>();
+
+	public ArrayList<String> getFollowedStocks() {
+		ArrayList<String> stocks = new ArrayList<String>();
 		ResultSet rows = executeQuery("Select * from Followed_Stocks");
 		try {
 			while (rows.next()) {
+
 				String name = rows.getString("tickerName");
-				Double mostRecentSellPrice= rows.getDouble("mostRecentSellPrice");
-				mostRecentSellPrice = (mostRecentSellPrice==0? 1000000: mostRecentSellPrice);
-				Stock stock=new Stock(name,mostRecentSellPrice,0,0,null);
-				stocks.add(stock);
+				/*
+				 * Double mostRecentSellPrice=
+				 * rows.getDouble("mostRecentSellPrice"); mostRecentSellPrice =
+				 * (mostRecentSellPrice==0? 1000000: mostRecentSellPrice); Stock
+				 * stock=new Stock(name,mostRecentSellPrice,0,0,null);
+				 * stocks.add(stock);
+				 */
+				stocks.add(name);
+
 			}
 			rows.close();
 		} catch (SQLException e) {
@@ -166,8 +174,6 @@ public class SQLDBConnection {
 		}
 		return stocks;
 	}
-	
-	
 
 	protected static ArrayList<String> convertOneDimensionResultSetToArrayList(
 			ResultSet names) {
@@ -178,7 +184,8 @@ public class SQLDBConnection {
 			}
 			names.close();
 		} catch (SQLException e) {
-			System.err.println("exception in convertOneDimensionResultSetToArrayList");
+			System.err
+					.println("exception in convertOneDimensionResultSetToArrayList");
 			e.printStackTrace();
 			System.exit(-1);
 		}
@@ -188,12 +195,12 @@ public class SQLDBConnection {
 	public void createViews(ArrayList<Stock> tickerNames) {
 		String sql;
 		for (Stock viewName : tickerNames) {
-			sql = "create or replace view " + viewName.getName() + "_Prices as "
-					+ "select * from Ticker_Prices "
-					+ "where Ticker_Prices.tickerName='"+viewName.getName()+"' "
-					+ "order by Ticker_Prices.time desc;";
+			sql = "create or replace view " + viewName.getName()
+					+ "_Prices as " + "select * from Ticker_Prices "
+					+ "where Ticker_Prices.tickerName='" + viewName.getName()
+					+ "' " + "order by Ticker_Prices.time desc;";
 			executeUpdate(sql);
-			
+
 		}
 	}
 

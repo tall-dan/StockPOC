@@ -1,3 +1,5 @@
+package model;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DateFormat;
@@ -24,9 +26,9 @@ public class Algorithm1 implements iTradeAlgorithm {
 		this.stocks=this.conn.getOwnedStocks();
 	}
 	@Override
-	public ArrayList<Stock> stocksToBuy() {
+	public ArrayList<Stock> stocksToBuy()  {
 		ArrayList<Stock> stocksToBuy=new ArrayList<Stock>();
-		double currentCash=this.conn.getCurrentCash();
+		/*double currentCash=this.conn.getCurrentCash();
 		if (currentCash>minimumInvestment){
 			ArrayList<Stock> followed=this.conn.getFollowedStocks();
 			for (Stock stock: followed){
@@ -39,7 +41,7 @@ public class Algorithm1 implements iTradeAlgorithm {
 					stocksToBuy.add(stock);
 				}
 			}
-		}
+		}*/
 		/*
 		 * logTransaction(); addStockToTable(stock);
 		 */

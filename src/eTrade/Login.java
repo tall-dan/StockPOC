@@ -1,3 +1,5 @@
+package eTrade;
+
 import java.awt.Desktop;
 
 import java.io.FileInputStream;
@@ -47,7 +49,7 @@ public class Login {
 			oauth_request_token = token.getToken(); // Get token string
 			oauth_request_token_secret = token.getSecret(); // Get token secret
 		} catch (IOException | ETWSException e) {
-			Main.handleError(e);
+			eTradeLog.handleError(e);
 		}
 		request.setToken(token.getToken());
 		request.setTokenSecret(token.getSecret());
@@ -64,7 +66,7 @@ public class Login {
 			Desktop desktop = Desktop.getDesktop();
 			desktop.browse(uri);
 		} catch (IOException | ETWSException | URISyntaxException e) {
-			Main.handleError(e);
+			eTradeLog.handleError(e);
 		}
 		Scanner scanner = new Scanner(System.in);
 		System.out.println("please input the verification code");
@@ -88,7 +90,7 @@ public class Login {
 		try {
 			token = client.getAccessToken(request);
 		} catch (IOException | ETWSException e) {
-			Main.handleError(e);
+			eTradeLog.handleError(e);
 		}
 		oauth_access_token = token.getToken(); // Access token string
 		oauth_access_token_secret = token.getSecret(); // Access token secret
@@ -99,7 +101,7 @@ public class Login {
 		try {
 			prop.load(new FileInputStream("local.properties"));
 		} catch (IOException e) {
-			Main.handleError(e);
+			eTradeLog.handleError(e);
 		}
 		oauth_consumer_secret=prop.getProperty("consumer_secret");
 		oauth_consumer_key=prop.getProperty("consumer_key");

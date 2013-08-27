@@ -1,3 +1,5 @@
+package model;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DateFormat;
@@ -6,53 +8,56 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
+import eTrade.eTradeLog;
+
 public class Stock {// Data class.
 
 	private String name;
 	private double buyPrice;
 	private double sellPrice;
 	private int shares;
-	private double maxLoss;
 	private Date buyTime;
+	private double maxLoss;
 
-	
-	public Stock(String name, double buyPrice, int shares, double maxLoss,
-			Date buyTime) {
+	public Stock(String name, double buyPrice, int shares, Date buyTime) {
 		this.name = name;
 		this.buyPrice = buyPrice;
 		this.shares = shares;
-		this.maxLoss = maxLoss;
 		this.buyTime = buyTime;
+		System.err.println("FIGURE OUT MAXLOSS");
+		System.exit(-1);
 	}
-	
+
 	/**
 	 * sell price - buy price
 	 */
-	public double getProfit(){
-		return this.sellPrice-this.buyPrice;
+	public double getProfit() {
+		return this.sellPrice - this.buyPrice;
 	}
 
-	protected static void pushPricesToDB(ArrayList<Stock> currentPrices)
-			throws ClassNotFoundException, SQLException {
-		SQLDBConnection conn = new SQLDBConnection();
-		String sql;
-		for (Stock stock : currentPrices) {
-			if (!isCurrentPrice(stock, conn)) {
-				DateFormat dateFormat = new SimpleDateFormat(
-						"yyyy/MM/dd HH:mm:ss");
-				Date date = new Date();
-				sql = "Insert into Ticker_Prices (tickerName, price, time) values ('"
-						+ stock.getName()
-						+ " ',"
-						+ stock.getBuyPrice()
-						+ ", '"
-						+ dateFormat.format(date) + "');";
-				conn.executeUpdate(sql);
+	public static void pushPricesToDB(ArrayList<Stock> currentPrices) {
+		try {
+			SQLDBConnection conn = new SQLDBConnection();
+			String sql;
+			for (Stock stock : currentPrices) {
+				if (!isCurrentPrice(stock, conn)) {
+					DateFormat dateFormat = new SimpleDateFormat(
+							"yyyy/MM/dd HH:mm:ss");
+					Date date = new Date();
+					sql = "Insert into Ticker_Prices (tickerName, price, time) values ('"
+							+ stock.getName()
+							+ " ',"
+							+ stock.getBuyPrice()
+							+ ", '" + dateFormat.format(date) + "');";
+					conn.executeUpdate(sql);
+				}
 			}
+		} catch (SQLException e) {
+			eTradeLog.handleError(e);
 		}
 
 	}
-	
+
 	protected double getCurrentPrice() {
 		String sql = "Select Price from " + getName()
 				+ "_Prices order by time desc limit 1";
@@ -92,8 +97,6 @@ public class Stock {// Data class.
 			return true;
 		return false;
 	}
-	
-	
 
 	/*
 	 * Probably a less ugly way to do this...
@@ -143,12 +146,13 @@ public class Stock {// Data class.
 	public void setName(String name) {
 		this.name = name;
 	}
-	
-	public Date getBuyTime(){
+
+	public Date getBuyTime() {
 		return this.buyTime;
 	}
-	public void setBuyTime(Date time){
-		this.buyTime=time;
+
+	public void setBuyTime(Date time) {
+		this.buyTime = time;
 	}
 
 	public double getSellPrice() {

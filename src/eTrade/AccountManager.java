@@ -1,3 +1,5 @@
+package eTrade;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -15,7 +17,6 @@ import com.etrade.etws.sdk.common.ETWSException;
 
 public class AccountManager {
 
-	private final static Logger LOGGER = Logger.getLogger(AccountManager.class .getName());
 	public static List<Account> getAccounts() {
 		AccountsClient account_client=getAccountsClient();
 		try {
@@ -23,15 +24,16 @@ public class AccountManager {
 			List<Account> alist = response.getResponse();
 			return alist;
 		} catch (Exception e) {
-			Main.handleError(e);
+			eTradeLog.handleError(e);
 		}
 		return null;//can't get here - either we return from the try, or die in the catch
 	}
 	
-	public static AccountsClient getAccountsClient(){
+	private static AccountsClient getAccountsClient(){
 		ClientRequest r = Login.getRequest();
 		return new AccountsClient(r);
 	}
+	
 	public static AccountBalanceResponse getAccountBalance(Account a){
 		return getAccountBalance(a.getAccountId());
 	} 
@@ -40,7 +42,7 @@ public class AccountManager {
 		try {
 			return getAccountsClient().getAccountBalance(accountID);
 		} catch (IOException | ETWSException e) {
-			Main.handleError(e);
+			eTradeLog.handleError(e);
 		}
 		return null;//can't get here  
 	}
@@ -58,7 +60,7 @@ public class AccountManager {
 		try {
 			aprs = client.getAccountPositions(acct, apr);
 		} catch (IOException | ETWSException e) {
-			Main.handleError(e);
+			eTradeLog.handleError(e);
 		}
 		return aprs;
 	}

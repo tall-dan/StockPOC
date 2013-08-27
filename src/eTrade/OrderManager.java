@@ -1,3 +1,5 @@
+package eTrade;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -34,7 +36,7 @@ public class OrderManager {
 		try {
 			return client.getOrderList(olr).getOrderListResponse().getOrderDetails();
 		} catch (IOException | ETWSException e) {
-			Main.handleError(e);
+			eTradeLog.handleError(e);
 		}
 		return null;
 	}
@@ -45,12 +47,12 @@ public class OrderManager {
 	public static void viewCurrentOrders(Account a ){
 		List<OrderDetails> details=getOrderList(a);
 		Iterator<OrderDetails> it =details.iterator();
-		log("=============Orders=========");
+		eTradeLog.log("=============Orders=========");
 		while (it.hasNext()){
 			OrderDetails detail= it.next();
-			log(detail.getOrder().getLegDetails().get(0).getSymbolDescription());
+			eTradeLog.log(detail.getOrder().getLegDetails().get(0).getSymbolDescription());
 		}
-		log("There are now "+details.size()+" orders");
+		eTradeLog.log("There are now "+details.size()+" orders");
 	}
 	
 	public static  PlaceEquityOrderResponse placeOrder(Account a){
@@ -72,14 +74,12 @@ public class OrderManager {
 		try {
 			return client.placeEquityOrder(orderRequest);
 		} catch (IOException | ETWSException e) {
-			Main.handleError(e);
+			eTradeLog.handleError(e);
 		}
 		return null;
 		
 	}
 	
-	private static void log(String message){
-		Main.writer.println(message);
-	}
+	
 	
 }
