@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 public interface iTradeAlgorithm {
 
-	abstract ArrayList<Stock> stocksToBuy() ;
+	abstract ArrayList<Stock> stocksToBuy(ArrayList<Stock> stocksToConsider) ;
 	
 	/**
 	 * 
@@ -16,3 +16,4 @@ public interface iTradeAlgorithm {
 	void updateOwnedStocks();
 	
 }
+

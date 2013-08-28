@@ -26,22 +26,21 @@ public class Algorithm1 implements iTradeAlgorithm {
 		this.stocks=this.conn.getOwnedStocks();
 	}
 	@Override
-	public ArrayList<Stock> stocksToBuy()  {
+	public ArrayList<Stock> stocksToBuy(ArrayList<Stock> stocksToConsider)  {
 		ArrayList<Stock> stocksToBuy=new ArrayList<Stock>();
-		/*double currentCash=this.conn.getCurrentCash();
+		double currentCash=this.conn.getCurrentCash();
 		if (currentCash>minimumInvestment){
-			ArrayList<Stock> followed=this.conn.getFollowedStocks();
-			for (Stock stock: followed){
-				double currentPrice=stock.getCurrentPrice();
+			for (Stock stock: stocksToConsider){
+				double currentPrice=stock.getBuyPrice();//buy price is currently market price
 				int shares=(int) Math.floor((currentCash-tradeFee)/currentPrice);
-				if (currentCash-shares*currentPrice<maxWaste&&currentPrice<stock.getBuyPrice()){//stock.getBuyPrice is actually it's most recent sale price.
+				if (currentCash-shares*currentPrice<maxWaste&&currentPrice<stock.getMostRecentSalePrice()){
 					stock.setShares(shares);
 					stock.setBuyPrice(currentPrice);
 					stock.setBuyTime(new Date());
 					stocksToBuy.add(stock);
 				}
 			}
-		}*/
+		}
 		/*
 		 * logTransaction(); addStockToTable(stock);
 		 */

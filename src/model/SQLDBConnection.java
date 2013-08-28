@@ -193,14 +193,18 @@ public class SQLDBConnection {
 	}
 
 	public void createViews(ArrayList<Stock> tickerNames) {
-		String sql;
+		String sql, sql2;
 		for (Stock viewName : tickerNames) {
 			sql = "create or replace view " + viewName.getName()
 					+ "_Prices as " + "select * from Ticker_Prices "
 					+ "where Ticker_Prices.tickerName='" + viewName.getName()
 					+ "' " + "order by Ticker_Prices.time desc;";
 			executeUpdate(sql);
-
+			sql2 ="create or replace view " + viewName.getName()
+					+ "_Stats as " + "select DISTINCT tickerName, AVG(price) as avgPrice, STDDEV(price) as stddev from "+ viewName.getName() 
+					+ "_Prices where tickerName='" + viewName.getName()
+					+ "';";
+			executeUpdate(sql2);
 		}
 	}
 

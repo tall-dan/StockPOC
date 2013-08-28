@@ -17,15 +17,12 @@ public class Stock {// Data class.
 	private double sellPrice;
 	private int shares;
 	private Date buyTime;
-	private double maxLoss;
 
 	public Stock(String name, double buyPrice, int shares, Date buyTime) {
 		this.name = name;
 		this.buyPrice = buyPrice;
 		this.shares = shares;
 		this.buyTime = buyTime;
-		System.err.println("FIGURE OUT MAXLOSS");
-		System.exit(-1);
 	}
 
 	/**
@@ -115,14 +112,6 @@ public class Stock {// Data class.
 		return false;
 	}
 
-	public double getMaxLoss() {
-		return maxLoss;
-	}
-
-	public void setMaxLoss(double maxLoss) {
-		this.maxLoss = maxLoss;
-	}
-
 	public int getShares() {
 		return shares;
 	}
@@ -161,6 +150,24 @@ public class Stock {// Data class.
 
 	public void setSellPrice(double sellPrice) {
 		this.sellPrice = sellPrice;
+	}
+
+	public double getMaxLoss() {
+		return this.buyPrice * this.shares * .03;
+	}
+
+	public double getMostRecentSalePrice() {
+		SQLDBConnection conn = new SQLDBConnection();
+		String sql = "Select mostRecentSellPrice from Followed_Stocks where tickerName = '"
+				+ this.name + "';";
+		ResultSet mostRecentSalePrice = conn.executeQuery(sql);
+		try {
+			if (mostRecentSalePrice.next()) 
+				return Double.valueOf(mostRecentSalePrice.getString(1));
+		} catch (NumberFormatException | SQLException e) {
+			eTradeLog.handleError(e);
+		}
+		return -500;
 	}
 
 }
