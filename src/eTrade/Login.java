@@ -6,20 +6,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Iterator;
 import java.util.Properties;
 import java.util.Scanner;
-import java.util.List;
-
-import org.apache.log4j.Logger;
-
-import com.etrade.etws.account.Account;
-import com.etrade.etws.account.AccountBalanceResponse;
-import com.etrade.etws.account.AccountListResponse;
 import com.etrade.etws.oauth.sdk.client.IOAuthClient;
 import com.etrade.etws.oauth.sdk.client.OAuthClientImpl;
 import com.etrade.etws.oauth.sdk.common.Token;
-import com.etrade.etws.sdk.client.AccountsClient;
 import com.etrade.etws.sdk.client.ClientRequest;
 import com.etrade.etws.sdk.client.Environment;
 import com.etrade.etws.sdk.common.ETWSException;

@@ -1,10 +1,11 @@
 package eTrade;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Iterator;
 import java.util.List;
+
+import model.Stock;
 
 import com.etrade.etws.account.Account;
 import com.etrade.etws.order.EquityOrderAction;
@@ -25,9 +26,7 @@ import com.etrade.etws.sdk.common.ETWSException;
 public class OrderManager {
 	private static ClientRequest request= Login.getRequest();
 	
-	public void createOrder(){
-		
-	}
+	public void createOrder(){}
 	
 	private static List<OrderDetails> getOrderList(Account a){
 		OrderClient client = new OrderClient(request);
@@ -55,21 +54,18 @@ public class OrderManager {
 		eTradeLog.log("There are now "+details.size()+" orders");
 	}
 	
-	public static  PlaceEquityOrderResponse placeOrder(Account a){
+	private static PlaceEquityOrderResponse placeOrder(Account a, EquityOrderRequest eor){
 		OrderClient client = new OrderClient(request);
 		PlaceEquityOrder orderRequest = new PlaceEquityOrder(); 
-		EquityOrderRequest eor = new EquityOrderRequest(); 
 		eor.setAccountId(a.getAccountId()); // sample values
-		eor.setSymbol("AAPL");
-		eor.setAllOrNone("FALSE"); 
-		eor.setClientOrderId("asdf1234"); 
+		eor.setAllOrNone("FALSE");
 		eor.setOrderTerm(EquityOrderTerm.GOOD_FOR_DAY); 
-		eor.setOrderAction(EquityOrderAction.BUY); 
 		eor.setMarketSession(MarketSession.REGULAR); 
 		eor.setPriceType(EquityPriceType.MARKET); 
-		eor.setQuantity(new BigInteger("40")); 
 		eor.setRoutingDestination(EquityOrderRoutingDestination.AUTO.value()); 
 		eor.setReserveOrder("FALSE"); 
+		String cid= createClientOrderId(eor);
+		eor.setClientOrderId(cid); 
 		orderRequest.setEquityOrderRequest(eor); 
 		try {
 			return client.placeEquityOrder(orderRequest);
@@ -77,6 +73,53 @@ public class OrderManager {
 			eTradeLog.handleError(e);
 		}
 		return null;
+		
+	}
+
+	/**
+	 * TODO Put here a description of what this method does.
+	 *
+	 * @param eor
+	 * @return
+	 */
+	private static String createClientOrderId(EquityOrderRequest eor) {
+		return String.format("%s%s%s%s",eor.getOrderAction().toString(),eor.getQuantity().toString(),eor.getSymbol());
+	}
+	
+
+	/**
+	 * BUY THAT STOCK THO
+	 *
+	 * @param stock
+	 * @param acct
+	 * @return 
+	 */
+	public static PlaceEquityOrderResponse buy(Stock stock, Account acct) {
+		EquityOrderRequest eor = new EquityOrderRequest(); 
+		eor.setSymbol(stock.getName());
+		eor.setOrderAction(EquityOrderAction.BUY);
+		eor.setQuantity(new BigInteger(String.valueOf(stock.getShares())));
+		System.err.println("Figure out what setAllOrNone should be.");
+		System.err.println("Figure out what setPriceType should be.");
+		return placeOrder(acct, eor);
+		
+	}
+
+	/**
+	 * TODO Put here a description of what this method does.
+	 *
+	 * @param stock
+	 * @param acct
+	 * @return 
+	 */
+	public static PlaceEquityOrderResponse sell(Stock stock, Account acct) {
+		EquityOrderRequest eor = new EquityOrderRequest(); 
+		eor.setSymbol(stock.getName());
+		eor.setOrderAction(EquityOrderAction.SELL);
+		eor.setQuantity(new BigInteger(String.valueOf(stock.getShares())));
+		System.err.println("Figure out what setAllOrNone should be.");
+		System.err.println("Figure out what setPriceType should be.");
+		return placeOrder(acct, eor);
 		
 	}
 	

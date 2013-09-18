@@ -162,12 +162,20 @@ public class Stock {// Data class.
 				+ this.name + "';";
 		ResultSet mostRecentSalePrice = conn.executeQuery(sql);
 		try {
-			if (mostRecentSalePrice.next()) 
+			if (mostRecentSalePrice.next())
 				return Double.valueOf(mostRecentSalePrice.getString(1));
 		} catch (NumberFormatException | SQLException e) {
 			eTradeLog.handleError(e);
 		}
 		return -500;
+	}
+
+	@Override
+	public String toString() {
+		return String
+				.format("TickerName: %s buyPrice: %d sellPrice: %d shares: %i buyTime: %s",
+						this.name, this.buyPrice, this.sellPrice, this.shares,
+						this.buyTime.toString());
 	}
 
 }

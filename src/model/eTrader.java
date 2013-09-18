@@ -8,33 +8,53 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+
+import com.etrade.etws.account.Account;
+import com.etrade.etws.order.PlaceEquityOrderResponse;
+
+import eTrade.AccountManager;
+import eTrade.OrderManager;
+import eTrade.eTradeLog;
 
 public class eTrader {
 	private SQLDBConnection conn = new SQLDBConnection();
 	private double tradeFee=9.99;
+	private Account acct;
+	
+	public eTrader(){
+		this.acct=getAccount();
+	}
+	
 	public void buy(ArrayList<Stock> stocksToBuy) {
 		for (Stock stock: stocksToBuy){
-//			if (allowTrade(stock)){
-				logTransaction(stock, "buy");
+			if (allowTrade(stock)){
+				updateDBAndLog(stock, "buy");
 				addStockToTable(stock);
-				updateCash(stock,"buy");
-				System.out.println("Bought a stock, yo");
+				PlaceEquityOrderResponse response= OrderManager.buy(stock, this.acct);
 				return; //only buy one stock at a time.
-	//		}
+			}
 		}
 	}
-
+	
+	
+	private void updateDBAndLog(Stock stock, String s ){
+		logTransaction(stock, s);
+		updateCash(stock,s);
+		eTradeLog.log(s +" "+ stock.toString());
+	}
 	
 
 	public void sell(ArrayList<Stock> stocksToSell) {
 		for (Stock stock : stocksToSell) {
 			if (allowTrade(stock)) {
 				stock.setSellPrice(stock.getCurrentPrice());
-				logTransaction(stock, "sell");
 				updateMostRecentSellPrice(stock);
 				removeStockFromTable(stock);
-				updateCash(stock,"sell");
-				System.out.println("sold some stocks, yo");
+				updateDBAndLog(stock, "sell");			
+				PlaceEquityOrderResponse response= OrderManager.sell(stock,this.acct);
+			
 			}
 		}
 	}
@@ -58,11 +78,11 @@ public class eTrader {
 	}
 
 	private boolean allowTrade(Stock s) {
-		if (s.isDayTrade()) {
+		/*if (s.isDayTrade()) {
 			if (maxNumDayTradesReached())
 				return false;
 			incrementDayTradesTable(s);
-		}
+		}*/
 		return true;
 	}
 
@@ -148,6 +168,7 @@ public class eTrader {
 				+ (((currentPrice - stock.getBuyPrice()) * shares)-tradeFee) 
 				+ ", '" 
 				+ dateFormat.format(date) + "');";
+		
 		this.conn.executeUpdate(sql);
 	}
 
@@ -198,5 +219,19 @@ public class eTrader {
 		long daysWithoutSunday = days - (days * 2 / 7);
 
 		return (int) (daysWithoutSunday - w1 + w2);
+	}
+	/**
+	 * TODO Put here a description of what this method does.
+	 *
+	 * @return
+	 */
+	private Account getAccount() {
+		List<Account> accounts=AccountManager.getAccounts();
+		Iterator<Account> it= accounts.iterator();
+		while (it.hasNext()){
+			//insert some logic in here to pick out the correct account
+			return it.next();
+		}
+		return null;
 	}
 }

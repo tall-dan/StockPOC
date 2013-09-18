@@ -39,7 +39,6 @@ public class Main {
 				Stock.pushPricesToDB(stocks);//allows our algorithm to do some stat analysis
 				trader.buy(algorithm.stocksToBuy(stocks));//pass stocks. Probably better way to do this.
 				trader.sell(algorithm.stocksToSell());
-				algorithm.updateOwnedStocks();
 				Thread.sleep(1000);
 				stocks=MarketManager.getStockData(tickerNames);
 			}
